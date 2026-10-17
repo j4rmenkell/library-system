@@ -1,8 +1,11 @@
-import type { User } from "./auth";
+import type { User } from './auth';
 
-export type BookStatus = "available" | "borrowed";
+export type BookStatus = 'available' | 'borrowed';
 
-export type BorrowingStatus = "pending" | "borrowed" | "returned" | "rejected";
+export type BorrowingStatus = 'pending' | 'borrowed' | 'returned' | 'rejected';
+
+// "overdue" is never stored: it is a borrowed book whose due_date has passed
+export type DisplayStatus = BookStatus | BorrowingStatus | 'overdue';
 
 export type Category = {
     id: number;
@@ -19,8 +22,10 @@ export type Book = {
     title: string;
     author: string;
     isbn: string;
-    publication_date: string | null;
+    publication_year: number | null;
     availability_status: BookStatus;
+    // Built by the Book model from cover_path; null when there is no cover
+    cover_url: string | null;
     category?: Category;
     created_at: string;
     updated_at: string;
@@ -61,6 +66,7 @@ export type ActivityLog = {
     updated_at: string;
 };
 
+// Shape of Laravel's ->paginate() result
 export type Paginated<T> = {
     data: T[];
     current_page: number;

@@ -13,11 +13,15 @@ export default defineConfig({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
             refresh: true,
             fonts: [
-                bunny('Public Sans', {
-                    weights: [400, 500, 600, 700],
+                bunny('Cinzel', {
+                    weights: [500, 600, 700],
                 }),
-                bunny('IBM Plex Mono', {
-                    weights: [400, 500],
+                bunny('Josefin Sans', {
+                    weights: [400, 600],
+                }),
+                bunny('Crimson Pro', {
+                    weights: [400, 500, 600],
+                    styles: ['normal', 'italic'],
                 }),
             ],
         }),
@@ -51,6 +55,7 @@ export default defineConfig({
             'tailwind.config.js',
             'resources/js/actions/**',
             'resources/js/components/ui/*',
+            'resources/js/components/reactbits/*',
             'resources/js/routes/**',
             'resources/js/wayfinder/**',
         ],
@@ -70,6 +75,7 @@ export default defineConfig({
             '.github/**',
             'composer.json',
             'resources/js/components/ui/*',
+            'resources/js/components/reactbits/*',
             'resources/views/mail/*',
         ],
         sortTailwindcss: {

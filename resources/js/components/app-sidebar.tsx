@@ -1,7 +1,17 @@
-import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import {
+    ArrowLeftRight,
+    Bookmark,
+    BookOpen,
+    Folder,
+    LayoutGrid,
+    ScrollText,
+    Search,
+    UserCog,
+    Users,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
+import { GreekKey } from '@/components/library/greek-key';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -14,33 +24,52 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import type { NavItem } from '@/types';
+import { index as books } from '@/routes/books';
+import { index as borrowings } from '@/routes/borrowings';
+import { index as catalog } from '@/routes/catalog';
+import { index as categories } from '@/routes/categories';
+import { index as logs } from '@/routes/logs';
+import { index as members } from '@/routes/members';
+import { index as myBorrowings } from '@/routes/my-borrowings';
+import { index as users } from '@/routes/users';
+import type { NavItem, Role } from '@/types';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
+// Admins and librarians run the library
+const staffNavItems: NavItem[] = [
+    { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
+    { title: 'Books', href: books(), icon: BookOpen },
+    { title: 'Categories', href: categories(), icon: Folder },
+    { title: 'Members', href: members(), icon: Users },
+    { title: 'Borrowings', href: borrowings(), icon: ArrowLeftRight },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
+// Only admins manage accounts and read the logs
+const adminNavItems: NavItem[] = [
+    { title: 'Users', href: users(), icon: UserCog },
+    { title: 'Activity Logs', href: logs(), icon: ScrollText },
 ];
+
+// Borrowers (shown as "Readers") browse and borrow
+const readerNavItems: NavItem[] = [
+    { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
+    { title: 'Book Catalog', href: catalog(), icon: Search },
+    { title: 'My Borrowed Books', href: myBorrowings(), icon: Bookmark },
+];
+
+const roleLabels: Record<Role, string> = {
+    admin: 'Admin',
+    librarian: 'Librarian',
+    borrower: 'Reader',
+};
 
 export function AppSidebar() {
+    const { auth } = usePage().props;
+    const role = auth.user.role;
+    const isReader = role === 'borrower';
+
     return (
-        <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader>
+        <Sidebar collapsible="icon" variant="sidebar">
+            <SidebarHeader className="gap-4 pt-4">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
@@ -50,14 +79,23 @@ export function AppSidebar() {
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
+                <GreekKey
+                    muted
+                    className="group-data-[collapsible=icon]:hidden"
+                />
             </SidebarHeader>
 
-            <SidebarContent>
-                <NavMain items={mainNavItems} />
+            <SidebarContent className="gap-4">
+                <NavMain
+                    label={roleLabels[role]}
+                    items={isReader ? readerNavItems : staffNavItems}
+                />
+                {role === 'admin' && (
+                    <NavMain label="Administration" items={adminNavItems} />
+                )}
             </SidebarContent>
 
-            <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+            <SidebarFooter className="border-t border-sidebar-border">
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
