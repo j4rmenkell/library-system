@@ -48,4 +48,23 @@ trait ProfileValidationRules
                 : Rule::unique(User::class)->ignore($userId),
         ];
     }
+    
+    /**
+     * Get the validation rules used to validate usernames.
+     *
+     * @return array<int, ValidationRule|array<mixed>|string>
+     */
+    protected function usernameRules(?int $userId = null): array
+    {
+        return [
+            'required',
+            'string',
+            'min:3',
+            'max:30',
+            'alpha_dash',
+            $userId === null
+                ? Rule::unique(User::class)
+                : Rule::unique(User::class)->ignore($userId),
+        ];
+    }
 }

@@ -28,6 +28,7 @@ class RegistrationTest extends TestCase
     {
         $response = $this->post(route('register.store'), [
             'name' => 'Test User',
+            'username' => 'testuser',
             'email' => 'test@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
@@ -35,5 +36,26 @@ class RegistrationTest extends TestCase
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard', absolute: false));
+        $this->assertDatabaseHas('users', [
+            'username' => 'testuser',
+            'role' => 'borrower',
+        ]);
+    }
+
+    public function test_registration_ignores_a_submitted_role()
+    {
+        $this->post(route('register.store'), [
+            'name' => 'Sneaky User',
+            'username' => 'sneaky',
+            'email' => 'sneaky@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+            'role' => 'admin',
+        ]);
+
+        $this->assertDatabaseHas('users', [
+            'username' => 'sneaky',
+            'role' => 'borrower',
+        ]);
     }
 }
