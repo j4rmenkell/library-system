@@ -12,7 +12,5 @@ export default function CategoriesIndex() {
 }
 
 CategoriesIndex.layout = {
-    breadcrumbs: [
-        { title: 'Categories', href: '/categories' },
-    ],
+    breadcrumbs: [{ title: 'Categories', href: '/categories' }],
 };

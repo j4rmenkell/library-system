@@ -12,7 +12,5 @@ export default function BorrowingsIndex() {
 }
 
 BorrowingsIndex.layout = {
-    breadcrumbs: [
-        { title: 'Borrowings', href: '/borrowings' },
-    ],
+    breadcrumbs: [{ title: 'Borrowings', href: '/borrowings' }],
 };

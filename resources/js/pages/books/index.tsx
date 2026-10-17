@@ -12,7 +12,5 @@ export default function BooksIndex() {
 }
 
 BooksIndex.layout = {
-    breadcrumbs: [
-        { title: 'Books', href: '/books' },
-    ],
+    breadcrumbs: [{ title: 'Books', href: '/books' }],
 };

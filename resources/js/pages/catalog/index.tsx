@@ -12,7 +12,5 @@ export default function CatalogIndex() {
 }
 
 CatalogIndex.layout = {
-    breadcrumbs: [
-        { title: 'Book Catalog', href: '/catalog' },
-    ],
+    breadcrumbs: [{ title: 'Book Catalog', href: '/catalog' }],
 };

@@ -12,7 +12,5 @@ export default function MembersIndex() {
 }
 
 MembersIndex.layout = {
-    breadcrumbs: [
-        { title: 'Members', href: '/members' },
-    ],
+    breadcrumbs: [{ title: 'Members', href: '/members' }],
 };

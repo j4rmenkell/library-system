@@ -12,7 +12,5 @@ export default function UsersIndex() {
 }
 
 UsersIndex.layout = {
-    breadcrumbs: [
-        { title: 'Users', href: '/users' },
-    ],
+    breadcrumbs: [{ title: 'Users', href: '/users' }],
 };

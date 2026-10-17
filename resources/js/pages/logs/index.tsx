@@ -12,7 +12,5 @@ export default function LogsIndex() {
 }
 
 LogsIndex.layout = {
-    breadcrumbs: [
-        { title: 'Activity Logs', href: '/logs' },
-    ],
+    breadcrumbs: [{ title: 'Activity Logs', href: '/logs' }],
 };
