@@ -13,6 +13,8 @@ export interface InfiniteMenuProps {
     items?: InfiniteMenuItem[];
     count?: number;
     tileSize?: number;
+    // Marguerite's Athenaeum: tile width / height. 1 is square; 2/3 fits book covers
+    tileAspect?: number;
     roundness?: number;
     zoom?: number;
     pullBack?: number;
@@ -50,6 +52,7 @@ uniform mat4 uProjection;
 uniform float uCamera;
 uniform float uRadius;
 uniform float uTileRadius;
+uniform float uAspect;
 uniform vec4 uSpin;
 uniform float uStretch;
 uniform float uShift;
@@ -68,7 +71,7 @@ void main() {
   vec3 tangent = normalize(cross(reference, center));
   vec3 bitangent = cross(center, tangent);
   float front = max(center.z, 0.0);
-  vec3 offset = (tangent * aCorner.x + bitangent * aCorner.y) * uTileRadius * mix(0.5, 1.0, front);
+  vec3 offset = (tangent * aCorner.x * uAspect + bitangent * aCorner.y) * uTileRadius * mix(0.5, 1.0, front);
   vec3 motion = cross(uSpin.xyz, center);
   float sweep = length(motion);
   if (sweep > 0.0001) {
@@ -235,6 +238,7 @@ const InfiniteMenu = ({
     items = [],
     count = 160,
     tileSize = 0.63,
+    tileAspect = 1,
     roundness = 0.2,
     zoom = 1.65,
     pullBack = 1,
@@ -263,6 +267,7 @@ const InfiniteMenu = ({
     const settings = {
         count: clamp(Math.round(count), 6, 400),
         tileSize: clamp(tileSize, 0.2, 1.2),
+        tileAspect: clamp(tileAspect, 0.3, 1),
         roundness: clamp(roundness, 0, 1),
         zoom: clamp(zoom, 0.2, 4),
         pullBack: clamp(pullBack, 0, 3),
@@ -308,6 +313,7 @@ const InfiniteMenu = ({
             'uCamera',
             'uRadius',
             'uTileRadius',
+            'uAspect',
             'uSpin',
             'uStretch',
             'uShift',
@@ -529,11 +535,15 @@ const InfiniteMenu = ({
                 image.onload = () => {
                     if (!alive || request !== atlas.request || !ctx) return;
                     const size = atlas.cell;
+                    // Cells are square but tiles are narrower (uAspect), so the
+                    // image is stretched sideways here and squeezed back on screen
+                    const stretched =
+                        image.naturalWidth / settingsRef.current.tileAspect;
                     const scale = Math.max(
-                        size / image.naturalWidth,
+                        size / stretched,
                         size / image.naturalHeight,
                     );
-                    const width = image.naturalWidth * scale;
+                    const width = stretched * scale;
                     const height = image.naturalHeight * scale;
                     const x = (index % atlas.cells) * size;
                     const y = Math.floor(index / atlas.cells) * size;
@@ -578,7 +588,8 @@ const InfiniteMenu = ({
             const radius =
                 (tileRadius() / ((rest - RADIUS) * Math.tan(FOV / 2))) *
                 (state.height / 2);
-            const rounded = Math.round(radius);
+            // Text sits beside the tile, so use its (narrower) half-width
+            const rounded = Math.round(radius * settingsRef.current.tileAspect);
             if (rounded !== state.tilePx) {
                 state.tilePx = rounded;
                 root.style.setProperty('--infinite-menu-tile', `${rounded}px`);
@@ -887,6 +898,7 @@ const InfiniteMenu = ({
                 state.axis[2],
                 reduce ? 0 : state.speed,
             );
+            gl.uniform1f(uniforms.uAspect, s.tileAspect);
             gl.uniform1f(uniforms.uStretch, s.stretch);
             gl.uniform1f(uniforms.uShift, state.shift);
             gl.uniform1f(uniforms.uCells, atlas.cells);

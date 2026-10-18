@@ -32,10 +32,6 @@ $pretend = function (string $message, ?string $redirectRoute = null) {
 // --- Landing page (public) ---------------------------------------------------
 Route::get('/', fn () => Inertia::render('welcome', [
     'books' => collect(MockLibrary::books())->whereNotNull('cover_url')->values(),
-    'totals' => [
-        'books' => count(MockLibrary::books()),
-        'categories' => count(MockLibrary::categories()),
-    ],
 ]))->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () use ($pretend) {

@@ -4,7 +4,6 @@ import { ColumnEmblem } from '@/components/library/column-emblem';
 import { capsButton } from '@/components/library/form-controls';
 import { GreekKey } from '@/components/library/greek-key';
 import InfiniteMenu from '@/components/reactbits/InfiniteMenu';
-import ScrollExpand from '@/components/reactbits/ScrollExpand';
 import { Button } from '@/components/ui/button';
 import { LOAN_DAYS, MAX_ACTIVE_LOANS } from '@/lib/library';
 import { dashboard, login } from '@/routes';
@@ -35,13 +34,7 @@ const STEPS = [
     },
 ];
 
-export default function Welcome({
-    books,
-    totals,
-}: {
-    books: Book[];
-    totals: { books: number; categories: number };
-}) {
+export default function Welcome({ books }: { books: Book[] }) {
     const { auth } = usePage().props;
 
     // Readers go to the catalog; everyone else is asked to log in first
@@ -175,44 +168,23 @@ export default function Welcome({
 
                 <GreekKey />
 
-                {/* The frame grows to fill the screen as the visitor scrolls */}
-                <ScrollExpand
-                    useWindowScroll
-                    src={books[0]?.cover_url?.replace('-M.jpg', '-L.jpg') ?? ''}
-                    alt={books[0] ? `Cover of ${books[0].title}` : ''}
-                    title="Spin the Shelf"
-                    scrollHint="Scroll to open the shelf"
-                    startWidth={34}
-                    startHeight={52}
-                    startRadius={2}
-                    overlayScrim={0.6}
-                    className="[&_[class*='font-bold']]:font-display [&_[class*='font-bold']]:font-semibold [&_[class*='font-bold']]:tracking-[0.04em]"
-                >
-                    <p className="font-caps text-xs font-semibold tracking-[0.22em] text-copper-bright uppercase">
-                        {totals.books} books · {totals.categories} mythologies
-                    </p>
-                    <p className="mt-4 max-w-xl font-display text-3xl leading-tight font-semibold text-bone md:text-5xl">
-                        Every god, hero and monster, one shelf away
-                    </p>
-                </ScrollExpand>
-
                 {/* ReactBits Infinite Menu: drag the sphere of covers */}
                 <section
                     id="shelf"
                     aria-label="Browse the shelves"
                     className="border-y border-line bg-ink-deep"
                 >
-                    <div className="mx-auto flex max-w-6xl flex-wrap items-baseline justify-between gap-3 px-6 pt-14">
+                    <div className="mx-auto max-w-6xl px-6 pt-14">
                         <h2 className="font-display text-3xl font-semibold">
                             On the shelf
                         </h2>
-                        <span className="text-dust">
-                            Drag to spin. Click the arrow to open a book.
-                        </span>
                     </div>
-                    <div className="relative h-[640px]">
+                    <div className="relative h-[760px]">
                         <InfiniteMenu
                             items={menuItems}
+                            tileAspect={2 / 3}
+                            tileSize={0.78}
+                            roundness={0.06}
                             theme="dark"
                             accentColor="#c8804f"
                             backgroundColor="#110e0b"
