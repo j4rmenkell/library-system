@@ -70,7 +70,6 @@ Route::middleware(['auth', 'verified'])->group(function () use ($pretend) {
     Route::middleware('role:admin,librarian')->group(function () use ($pretend) {
 
         // Categories
-        
 
         // Books
         Route::get('books', fn (Request $request) => Inertia::render('books/index', [

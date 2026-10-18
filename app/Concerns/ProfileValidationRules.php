@@ -48,7 +48,7 @@ trait ProfileValidationRules
                 : Rule::unique(User::class)->ignore($userId),
         ];
     }
-    
+
     /**
      * Get the validation rules used to validate usernames.
      *
