@@ -70,12 +70,7 @@ Route::middleware(['auth', 'verified'])->group(function () use ($pretend) {
     Route::middleware('role:admin,librarian')->group(function () use ($pretend) {
 
         // Categories
-        Route::get('categories', fn () => Inertia::render('categories/index', [
-            'categories' => MockLibrary::categories(),
-        ]))->name('categories.index');
-        Route::post('categories', $pretend('Category added', 'categories.index'))->name('categories.store');
-        Route::put('categories/{category}', $pretend('Category updated', 'categories.index'))->name('categories.update');
-        Route::delete('categories/{category}', $pretend('Category deleted', 'categories.index'))->name('categories.destroy');
+        
 
         // Books
         Route::get('books', fn (Request $request) => Inertia::render('books/index', [

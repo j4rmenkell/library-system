@@ -2,10 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\CategoryController;
+
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware('role:admin,librarian')->group(function () {
-        // Real controller routes go here: categories, books, members, borrowings
+        Route::resource('categories', CategoryController::class)->only(['index','store','update','destroy']);
+
     });
 
     Route::middleware('role:admin')->group(function () {
