@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Route;
 
@@ -7,7 +8,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware('role:admin,librarian')->group(function () {
         Route::resource('categories', CategoryController::class)->only(['index', 'store', 'update', 'destroy']);
-
+        Route::resource('books', BookController::class)->except(['show']);
     });
 
     Route::middleware('role:admin')->group(function () {

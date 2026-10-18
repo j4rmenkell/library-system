@@ -69,25 +69,6 @@ Route::middleware(['auth', 'verified'])->group(function () use ($pretend) {
     // --- Librarian + admin -----------------------------------------------
     Route::middleware('role:admin,librarian')->group(function () use ($pretend) {
 
-        // Categories
-
-        // Books
-        Route::get('books', fn (Request $request) => Inertia::render('books/index', [
-            'books' => MockLibrary::paginate(MockLibrary::books(), $request),
-            'categories' => MockLibrary::categories(),
-            'filters' => $request->only(['search', 'category', 'status']),
-        ]))->name('books.index');
-        Route::get('books/create', fn () => Inertia::render('books/create', [
-            'categories' => MockLibrary::categories(),
-        ]))->name('books.create');
-        Route::post('books', $pretend('Book added', 'books.index'))->name('books.store');
-        Route::get('books/{book}/edit', fn (int $book) => Inertia::render('books/edit', [
-            'book' => MockLibrary::book($book),
-            'categories' => MockLibrary::categories(),
-        ]))->name('books.edit');
-        Route::put('books/{book}', $pretend('Book updated', 'books.index'))->name('books.update');
-        Route::delete('books/{book}', $pretend('Book deleted', 'books.index'))->name('books.destroy');
-
         // Members
         Route::get('members', fn (Request $request) => Inertia::render('members/index', [
             'members' => MockLibrary::paginate(MockLibrary::members(), $request),
