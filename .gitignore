@@ -42,3 +42,12 @@ yarn-error.log
 /boost.json
 /opencode.json
 /opencode.jsonc
+
+# Terraform: state and variable files can contain secrets
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+crash.log
+.terraform.tfstate.lock.info
