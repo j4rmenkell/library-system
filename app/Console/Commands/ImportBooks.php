@@ -6,8 +6,6 @@ use App\Models\Book;
 use App\Models\Category;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
-use Throwable;
 
 class ImportBooks extends Command
 {
@@ -49,8 +47,6 @@ class ImportBooks extends Command
                     continue;
                 }
 
-                $coverPath = $this->downloadCover($doc['cover_i'], $isbn);
-
                 Book::create([
                     'category_id' => $category->id,
                     'title' => mb_strimwidth($doc['title'], 0, 255),
@@ -58,12 +54,13 @@ class ImportBooks extends Command
                     'isbn' => $isbn,
                     'publication_year' => $doc['first_publish_year'] ?? null,
                     'availability_status' => 'available',
-                    'cover_path' => $coverPath,
+                    // Covers stay on Open Library, so there's nothing to store
+                    'cover_path' => "https://covers.openlibrary.org/b/id/{$doc['cover_i']}-L.jpg",
                 ]);
 
                 $added++;
                 $authors[$author] = ($authors[$author] ?? 0) + 1;
-                $this->line("  + {$doc['title']}".($coverPath ? '' : ' (no cover)'));
+                $this->line("  + {$doc['title']}");
             }
 
             $this->line("  {$added} added");
@@ -86,10 +83,13 @@ class ImportBooks extends Command
             'limit' => 60,
         ]);
 
-        return collect($response->json('docs', []))
-            ->filter(fn ($doc) => ! empty($doc['cover_i']) && ! empty($doc['author_name']) && ! empty($doc['isbn']))
-            ->values()
-            ->all();
+        /** @var array<int, array<string, mixed>> $docs */
+        $docs = $response->json('docs') ?? [];
+
+        return array_values(array_filter(
+            $docs,
+            fn (array $doc) => ! empty($doc['cover_i']) && ! empty($doc['author_name']) && ! empty($doc['isbn']),
+        ));
     }
 
     /**
@@ -101,33 +101,13 @@ class ImportBooks extends Command
     {
         $clean = collect($isbns)->map(fn ($isbn) => strtoupper(preg_replace('/[^0-9Xx]/', '', $isbn)));
 
-        return $clean->first(fn ($isbn) => preg_match('/^97[89]\d{10}$/', $isbn))
-            ?? $clean->first(fn ($isbn) => preg_match('/^\d{9}[\dX]$/', $isbn));
+        return $clean->first(fn (string $isbn) => preg_match('/^97[89]\d{10}$/', $isbn) === 1)
+            ?? $clean->first(fn (string $isbn) => preg_match('/^\d{9}[\dX]$/', $isbn) === 1);
     }
 
     // Titles like "Ἰλιάς" are the original-language edition; we want English ones
     private function isForeignScript(string $title): bool
     {
         return (bool) preg_match('/[\p{Greek}\p{Cyrillic}\p{Arabic}\p{Han}]/u', $title);
-    }
-
-    // Saves the large cover to storage/app/public/covers/<isbn>.jpg
-    private function downloadCover(int $coverId, string $isbn): ?string
-    {
-        try {
-            $image = Http::timeout(30)->get("https://covers.openlibrary.org/b/id/{$coverId}-L.jpg");
-
-            if (! $image->successful()) {
-                return null;
-            }
-
-            $path = "covers/{$isbn}.jpg";
-            Storage::disk('public')->put($path, $image->body());
-
-            return $path;
-        } catch (Throwable) {
-            // A missing cover shouldn't stop the whole import
-            return null;
-        }
     }
 }
