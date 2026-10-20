@@ -24,12 +24,12 @@ class BookController extends Controller
                 $digits = preg_replace('/[^0-9Xx]/', '', $search);
 
                 $query->where(function ($query) use ($search, $digits) {
-                    $query->where('title', 'like', "%{$search}%")
-                        ->orWhere('author', 'like', "%{$search}%");
+                    $query->whereLike('title', "%{$search}%")
+                        ->orWhereLike('author', "%{$search}%");
 
                     // Only when the search has digits: otherwise '%%' would match every book
                     if ($digits !== '') {
-                        $query->orWhere('isbn', 'like', "%{$digits}%");
+                        $query->orWhereLike('isbn', "%{$digits}%");
                     }
                 });
             })
