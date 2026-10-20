@@ -16,7 +16,7 @@ resource "azurerm_federated_identity_credential" "github_main" {
   user_assigned_identity_id = azurerm_user_assigned_identity.github_deploy.id
   issuer                    = "https://token.actions.githubusercontent.com"
   audience                  = ["api://AzureADTokenExchange"]
-  subject                   = "repo:j4rmenkell/library-system:ref:refs/heads/main"
+  subject                   = "repo:j4rmenkell@171651517/library-system@1418421623:ref:refs/heads/main"
 }
 
 # Least privilege: Contributor on this project's resource group only,
