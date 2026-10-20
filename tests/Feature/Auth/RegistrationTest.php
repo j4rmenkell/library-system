@@ -32,6 +32,8 @@ class RegistrationTest extends TestCase
             'email' => 'test@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'contact_number' => '0917 555 0123',
+            'address' => 'Pasig City',
         ]);
 
         $this->assertAuthenticated();
@@ -39,6 +41,11 @@ class RegistrationTest extends TestCase
         $this->assertDatabaseHas('users', [
             'username' => 'testuser',
             'role' => 'borrower',
+        ]);
+        $this->assertDatabaseHas('members', [
+            'name' => 'Test User',
+            'contact_number' => '0917 555 0123',
+            'address' => 'Pasig City',
         ]);
     }
 
@@ -50,6 +57,8 @@ class RegistrationTest extends TestCase
             'email' => 'sneaky@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'contact_number' => '0917 555 0188',
+            'address' => 'Sampaloc, Manila',
             'role' => 'admin',
         ]);
 
@@ -57,5 +66,20 @@ class RegistrationTest extends TestCase
             'username' => 'sneaky',
             'role' => 'borrower',
         ]);
+    }
+
+    public function test_registration_needs_contact_number_and_address()
+    {
+        $this->post(route('register.store'), [
+            'name' => 'Incomplete User',
+            'username' => 'incomplete',
+            'email' => 'incomplete@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertSessionHasErrors(['contact_number', 'address']);
+
+        $this->assertGuest();
+        $this->assertDatabaseMissing('users', ['username' => 'incomplete']);
+        $this->assertDatabaseCount('members', 0);
     }
 }

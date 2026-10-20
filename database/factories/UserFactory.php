@@ -26,7 +26,8 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'username' => fake()->unique()->userName(),
+            // Faker's usernames can contain dots, which the username rule rejects
+            'username' => str_replace('.', '_', fake()->unique()->userName()),
             'role' => 'borrower',
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
