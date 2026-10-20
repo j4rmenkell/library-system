@@ -1,0 +1,30 @@
+# Rebuilt inside the image
+/vendor
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/bootstrap/cache/*.php
+/resources/js/actions
+/resources/js/routes
+/resources/js/wayfinder
+
+# Secrets and local state never go into the image
+.env
+.env.*
+!.env.example
+/storage/*.key
+/storage/app/public/covers
+/storage/logs/*.log
+/storage/framework/cache/data
+/storage/framework/sessions/*
+/storage/framework/views/*.php
+/database/*.sqlite
+
+# Not needed to run the app
+/.git
+/.github
+/.claude
+/infra
+/tests
+*.md
