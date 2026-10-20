@@ -6,53 +6,53 @@
 #   Stop:    docker compose down        (add -v to also delete the data)
 
 services:
-  app:
-    build: .
-    ports:
-      - "8080:8080"
-    environment:
-      APP_NAME: "Marguerite's Athenaeum"
-      APP_ENV: production
-      APP_DEBUG: "false"
-      # Read from your .env, so the key never sits in this file
-      APP_KEY: ${APP_KEY:?Run "php artisan key:generate" so .env has an APP_KEY}
-      APP_URL: http://localhost:8080
-      LOG_CHANNEL: stderr
-      LOG_LEVEL: info
+    app:
+        build: .
+        ports:
+            - '8080:8080'
+        environment:
+            APP_NAME: "Marguerite's Athenaeum"
+            APP_ENV: production
+            APP_DEBUG: 'false'
+            # Read from your .env, so the key never sits in this file
+            APP_KEY: ${APP_KEY:?Run "php artisan key:generate" so .env has an APP_KEY}
+            APP_URL: http://localhost:8080
+            LOG_CHANNEL: stderr
+            LOG_LEVEL: info
 
-      DB_CONNECTION: pgsql
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_DATABASE: athenaeum
-      DB_USERNAME: athenaeum
-      DB_PASSWORD: athenaeum-local
+            DB_CONNECTION: pgsql
+            DB_HOST: db
+            DB_PORT: 5432
+            DB_DATABASE: athenaeum
+            DB_USERNAME: athenaeum
+            DB_PASSWORD: athenaeum-local
 
-      SESSION_DRIVER: database
-      CACHE_STORE: database
-      QUEUE_CONNECTION: sync
-      MAIL_MAILER: log
+            SESSION_DRIVER: database
+            CACHE_STORE: database
+            QUEUE_CONNECTION: sync
+            MAIL_MAILER: log
 
-      # Production seeding creates only this admin (local values only)
-      ADMIN_EMAIL: admin@library.test
-      ADMIN_PASSWORD: athenaeum-local-admin
-    depends_on:
-      db:
-        condition: service_healthy
+            # Production seeding creates only this admin (local values only)
+            ADMIN_EMAIL: admin@library.test
+            ADMIN_PASSWORD: athenaeum-local-admin
+        depends_on:
+            db:
+                condition: service_healthy
 
-  db:
-    image: postgres:17-alpine
-    environment:
-      POSTGRES_DB: athenaeum
-      POSTGRES_USER: athenaeum
-      POSTGRES_PASSWORD: athenaeum-local
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    # The app waits until Postgres actually accepts connections
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U athenaeum -d athenaeum"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
+    db:
+        image: postgres:17-alpine
+        environment:
+            POSTGRES_DB: athenaeum
+            POSTGRES_USER: athenaeum
+            POSTGRES_PASSWORD: athenaeum-local
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        # The app waits until Postgres actually accepts connections
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U athenaeum -d athenaeum']
+            interval: 5s
+            timeout: 3s
+            retries: 10
 
 volumes:
-  pgdata:
+    pgdata:
