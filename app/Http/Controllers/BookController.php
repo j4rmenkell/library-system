@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
+use App\Models\BookCover;
 use App\Models\Category;
 use App\Models\Log;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -78,12 +82,21 @@ class BookController extends Controller
             'isbn' => ['required', 'regex:/^(\d{9}[\dX]|\d{13})$/', 'unique:books,isbn'],
             'publication_year' => 'nullable|integer|min:-3000|max:'.now()->year,
             'category_id' => 'required|exists:categories,id',
+            // a picture up to 2 MB; images only, so no SVGs or PDFs sneak in
+            'cover' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ], $this->isbnMessages());
 
         // a new book always starts on the shelf
         $validatedData['availability_status'] = 'available';
 
+        // the picture is saved on its own below, not as a column of the book
+        unset($validatedData['cover']);
+
         $book = Book::create($validatedData);
+
+        if ($request->hasFile('cover')) {
+            $this->saveCover($book, $request->file('cover'));
+        }
 
         Log::create(['user_id' => auth()->id(), 'action' => "Added book {$book->title}"]);
 
@@ -113,9 +126,17 @@ class BookController extends Controller
             'isbn' => ['required', 'regex:/^(\d{9}[\dX]|\d{13})$/', 'unique:books,isbn,'.$id],
             'publication_year' => 'nullable|integer|min:-3000|max:'.now()->year,
             'category_id' => 'required|exists:categories,id',
+            // a picture up to 2 MB; images only, so no SVGs or PDFs sneak in
+            'cover' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ], $this->isbnMessages());
 
+        unset($validatedData['cover']);
         $book->update($validatedData);
+
+        // a new picture replaces the old one
+        if ($request->hasFile('cover')) {
+            $this->saveCover($book, $request->file('cover'));
+        }
 
         Log::create(['user_id' => auth()->id(), 'action' => "Edited book {$book->title}"]);
 
@@ -139,6 +160,30 @@ class BookController extends Controller
         return redirect()->route('books.index')->with('success', 'Book deleted.');
     }
 
+    // send an uploaded cover to the browser (anyone can see covers, even guests)
+    public function cover(string $id): HttpResponse
+    {
+        $cover = BookCover::where('book_id', $id)->firstOrFail();
+
+        return response(base64_decode($cover->data))
+            ->header('Content-Type', $cover->mime_type)
+            ->header('X-Content-Type-Options', 'nosniff')
+            // the URL changes with every upload, so browsers can keep it for a year
+            ->header('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+
+    // keep the picture in the database: Azure wipes the disk whenever the app sleeps
+    private function saveCover(Book $book, UploadedFile $file): void
+    {
+        BookCover::updateOrCreate(
+            ['book_id' => $book->id],
+            ['mime_type' => $file->getMimeType(), 'data' => base64_encode($file->getContent())],
+        );
+
+        // a new code on every upload, so browsers don't keep showing the old cover
+        $book->update(['cover_path' => 'upload-'.Str::random(12)]);
+    }
+
     // remove the dashes and spaces so "978-0-316" is saved as "9780316"
     private function cleanIsbn(Request $request): void
     {
@@ -147,13 +192,16 @@ class BookController extends Controller
         ]);
     }
 
-    // friendlier error messages for the ISBN field
+    // friendlier error messages for the ISBN and cover fields
     /** @return array<string, string> */
     private function isbnMessages(): array
     {
         return [
             'isbn.regex' => 'An ISBN has 10 or 13 digits. Check the number on the back cover.',
             'isbn.unique' => 'This ISBN is already in the catalog.',
+            'cover.image' => 'The cover has to be a picture: JPG, PNG or WebP.',
+            'cover.mimes' => 'The cover has to be a picture: JPG, PNG or WebP.',
+            'cover.max' => 'The cover can be at most 2 MB.',
         ];
     }
 }

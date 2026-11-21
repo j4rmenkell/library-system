@@ -31,7 +31,7 @@ The app itself, _Marguerite's Athenaeum_, is a library system built for my 4th-y
 - **Neon instead of Azure Database for PostgreSQL.** Serverless Postgres with a free tier that also suspends when idle. It runs in Singapore, the same region as the app.
 - **Images tagged by commit SHA.** Every deploy points to the exact commit it was built from.
 - **Terraform owns the infrastructure, CI/CD owns the app version.** Terraform ignores the image tag, so applying infrastructure changes never rolls back a deploy.
-- **Book covers are Open Library URLs.** The app stores no files, so it needs no storage account.
+- **Book covers live in the database, not on disk.** Imported covers are Open Library URLs, and covers uploaded from the book form (2 MB max) are saved in Postgres. The container's disk is wiped whenever the app scales to zero, and this way it still needs no storage account.
 
 ## Repository layout
 

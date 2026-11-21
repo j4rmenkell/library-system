@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Book extends Model
 {
@@ -39,9 +40,16 @@ class Book extends Model
         return $this->hasMany(Borrowing::class);
     }
 
+    /** @return HasOne<BookCover, $this> */
+    public function cover(): HasOne
+    {
+        return $this->hasOne(BookCover::class);
+    }
+
     /**
-     * Imported covers are Open Library URLs and are used as they are;
-     * a relative path like "covers/123.jpg" points at local storage
+     * Imported covers are Open Library URLs and are used as they are.
+     * For an uploaded cover, cover_path is just a code like "upload-x7Kq2..."
+     * that changes on every upload, so browsers fetch the new picture
      *
      * @return Attribute<string|null, never>
      */
@@ -50,7 +58,7 @@ class Book extends Model
         return Attribute::get(fn () => match (true) {
             ! $this->cover_path => null,
             str_starts_with($this->cover_path, 'http') => $this->cover_path,
-            default => asset('storage/'.$this->cover_path),
+            default => route('books.cover', ['id' => $this->id, 'v' => $this->cover_path]),
         });
     }
 }

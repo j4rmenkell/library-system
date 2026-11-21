@@ -25,6 +25,9 @@ Route::patterns([
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// Uploaded book covers; public, because the landing page shows them to guests
+Route::get('books/{id}/cover', [BookController::class, 'cover'])->name('books.cover');
+
 // The link in the verification email: signed, so it can't be guessed or edited
 Route::get('email/confirm/{id}/{hash}', [EmailVerificationController::class, 'verify'])
     ->middleware(['signed', 'throttle:6,1'])
