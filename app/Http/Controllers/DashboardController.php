@@ -10,33 +10,38 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    // One page, different content: staff see the library, readers see their books
-    public function __invoke(Request $request): Response
+    // one page, two versions: readers see their own books, staff see the whole library
+    public function index(Request $request): Response
     {
         if ($request->user()->role === 'borrower') {
             $member = $request->user()->member;
 
-            return Inertia::render('dashboard', [
-                'reader' => [
-                    'loans' => $member
-                        ? $member->borrowings()->active()->with('book')->latest()->get()
-                        : [],
-                    'fresh' => Book::with('category')->latest('id')->take(6)->get(),
-                ],
-            ]);
+            $reader = [
+                // books I asked for or have right now
+                'loans' => $member
+                    ? $member->borrowings()->whereIn('status', ['pending', 'borrowed'])->with('book')->latest()->get()
+                    : [],
+                // the 6 newest books in the library
+                'fresh' => Book::with('category')->latest('id')->take(6)->get(),
+            ];
+
+            return Inertia::render('dashboard', compact('reader'));
         }
 
-        return Inertia::render('dashboard', [
-            'staff' => [
-                'stats' => [
-                    'total' => Book::count(),
-                    'available' => Book::where('availability_status', 'available')->count(),
-                    'out' => Book::where('availability_status', 'borrowed')->count(),
-                    'overdue' => Borrowing::overdue()->count(),
-                ],
-                'pending' => Borrowing::where('status', 'pending')->with(['book', 'member'])->oldest()->take(6)->get(),
-                'overdue' => Borrowing::overdue()->with(['book', 'member'])->orderBy('due_date')->take(6)->get(),
+        $staff = [
+            'stats' => [
+                'total' => Book::count(),
+                'available' => Book::where('availability_status', 'available')->count(),
+                'out' => Book::where('availability_status', 'borrowed')->count(),
+                'overdue' => Borrowing::where('status', 'borrowed')->whereDate('due_date', '<', today())->count(),
             ],
-        ]);
+            // oldest requests first, since they've been waiting the longest
+            'pending' => Borrowing::where('status', 'pending')->with(['book', 'member'])->oldest()->take(6)->get(),
+            // the most overdue first
+            'overdue' => Borrowing::where('status', 'borrowed')->whereDate('due_date', '<', today())
+                ->with(['book', 'member'])->orderBy('due_date')->take(6)->get(),
+        ];
+
+        return Inertia::render('dashboard', compact('staff'));
     }
 }

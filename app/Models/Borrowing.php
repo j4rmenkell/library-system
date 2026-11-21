@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Database\Factories\BorrowingFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -49,25 +48,5 @@ class Borrowing extends Model
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class);
-    }
-
-    /**
-     * Requested or out on loan: what counts towards a reader's limit
-     *
-     * @param  Builder<Borrowing>  $query
-     */
-    public function scopeActive(Builder $query): void
-    {
-        $query->whereIn('status', ['pending', 'borrowed']);
-    }
-
-    /**
-     * Overdue isn't stored: it's a borrowed book whose due date has passed
-     *
-     * @param  Builder<Borrowing>  $query
-     */
-    public function scopeOverdue(Builder $query): void
-    {
-        $query->where('status', 'borrowed')->whereDate('due_date', '<', today());
     }
 }

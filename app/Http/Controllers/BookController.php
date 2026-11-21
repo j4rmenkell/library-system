@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\BookRequest;
 use App\Models\Book;
 use App\Models\Category;
-use App\Support\ActivityLogger;
+use App\Models\Log;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,91 +12,141 @@ use Inertia\Response;
 
 class BookController extends Controller
 {
+    // show all books, with search and filters
     public function index(Request $request): Response
     {
+        $query = Book::with('category')->orderBy('title');
+
+        // search by title, author or ISBN
+        if ($request->search) {
+            $search = $request->search;
+
+            // ISBNs are saved as digits only, so "978-0-316" should find "9780316"
+            $digits = preg_replace('/[^0-9Xx]/', '', $search);
+
+            // whereLike ignores upper/lower case, even on Postgres
+            $query->where(function ($q) use ($search, $digits) {
+                $q->whereLike('title', "%{$search}%")
+                    ->orWhereLike('author', "%{$search}%");
+
+                // only check the ISBN if there are digits, or else '%%' matches every book
+                if ($digits !== '') {
+                    $q->orWhereLike('isbn', "%{$digits}%");
+                }
+            });
+        }
+
+        if ($request->category) {
+            $query->where('category_id', $request->category);
+        }
+
+        if ($request->status) {
+            $query->where('availability_status', $request->status);
+        }
+
+        // withQueryString keeps the search in the page links
+        $books = $query->paginate(10)->withQueryString();
+        $categories = Category::orderBy('name')->get(['id', 'name']);
         $filters = $request->only(['search', 'category', 'status']);
 
-        $books = Book::query()
-            ->with('category')
-            ->when($filters['search'] ?? null, function ($query, string $search) {
-                // ISBNs are stored as digits only, so "978-0-316" searches "9780316"
-                $digits = preg_replace('/[^0-9Xx]/', '', $search);
-
-                $query->where(function ($query) use ($search, $digits) {
-                    $query->whereLike('title', "%{$search}%")
-                        ->orWhereLike('author', "%{$search}%");
-
-                    // Only when the search has digits: otherwise '%%' would match every book
-                    if ($digits !== '') {
-                        $query->orWhereLike('isbn', "%{$digits}%");
-                    }
-                });
-            })
-            ->when($filters['category'] ?? null, fn ($query, $category) => $query->where('category_id', $category))
-            ->when($filters['status'] ?? null, fn ($query, $status) => $query->where('availability_status', $status))
-            ->orderBy('title')
-            ->paginate(10)
-            ->withQueryString();
-
-        return Inertia::render('books/index', [
-            'books' => $books,
-            'categories' => Category::orderBy('name')->get(['id', 'name']),
-            'filters' => $filters,
-        ]);
+        return Inertia::render('books/index', compact('books', 'categories', 'filters'));
     }
 
+    // show the add book form
     public function create(): Response
     {
-        return Inertia::render('books/create', [
-            'categories' => Category::orderBy('name')->get(['id', 'name']),
-        ]);
+        $categories = Category::orderBy('name')->get(['id', 'name']);
+
+        return Inertia::render('books/create', compact('categories'));
     }
 
-    public function store(BookRequest $request): RedirectResponse
+    // save a new book
+    public function store(Request $request): RedirectResponse
     {
-        $book = Book::create([
-            ...$request->validated(),
-            'availability_status' => 'available',
-        ]);
+        $this->cleanIsbn($request);
 
-        ActivityLogger::log("Added book {$book->title}");
-        Inertia::flash('toast', ['type' => 'success', 'message' => "{$book->title} is on the shelf."]);
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'author' => 'required|string|max:255',
+            'isbn' => ['required', 'regex:/^(\d{9}[\dX]|\d{13})$/', 'unique:books,isbn'],
+            'publication_year' => 'nullable|integer|min:-3000|max:'.now()->year,
+            'category_id' => 'required|exists:categories,id',
+        ], $this->isbnMessages());
 
-        return to_route('books.index');
+        // a new book always starts on the shelf
+        $validatedData['availability_status'] = 'available';
+
+        $book = Book::create($validatedData);
+
+        Log::create(['user_id' => auth()->id(), 'action' => "Added book {$book->title}"]);
+
+        return redirect()->route('books.index')->with('success', "{$book->title} is on the shelf.");
     }
 
-    public function edit(Book $book): Response
+    // show the edit book form
+    public function edit(string $id): Response
     {
-        return Inertia::render('books/edit', [
-            'book' => $book,
-            'categories' => Category::orderBy('name')->get(['id', 'name']),
-        ]);
+        $book = Book::findOrFail($id);
+        $categories = Category::orderBy('name')->get(['id', 'name']);
+
+        return Inertia::render('books/edit', compact('book', 'categories'));
     }
 
-    public function update(BookRequest $request, Book $book): RedirectResponse
+    // update a book
+    public function update(Request $request, string $id): RedirectResponse
     {
-        $book->update($request->validated());
+        $book = Book::findOrFail($id);
 
-        ActivityLogger::log("Edited book {$book->title}");
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'Book updated.']);
+        $this->cleanIsbn($request);
 
-        return to_route('books.index');
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'author' => 'required|string|max:255',
+            // ignore this book's own ISBN when checking unique
+            'isbn' => ['required', 'regex:/^(\d{9}[\dX]|\d{13})$/', 'unique:books,isbn,'.$id],
+            'publication_year' => 'nullable|integer|min:-3000|max:'.now()->year,
+            'category_id' => 'required|exists:categories,id',
+        ], $this->isbnMessages());
+
+        $book->update($validatedData);
+
+        Log::create(['user_id' => auth()->id(), 'action' => "Edited book {$book->title}"]);
+
+        return redirect()->route('books.index')->with('success', 'Book updated.');
     }
 
-    public function destroy(Book $book): RedirectResponse
+    // delete a book
+    public function destroy(string $id): RedirectResponse
     {
-        // Deleting would erase readers' borrowing history, so it's blocked
+        $book = Book::findOrFail($id);
+
+        // deleting it would erase the readers' borrowing history, so I block it
         if ($book->borrowings()->exists()) {
-            Inertia::flash('toast', ['type' => 'error', 'message' => "{$book->title} has borrowing history, so it can't be deleted."]);
-
-            return back();
+            return back()->with('error', "{$book->title} has borrowing history, so it can't be deleted.");
         }
 
         $book->delete();
 
-        ActivityLogger::log("Deleted book {$book->title}");
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'Book deleted.']);
+        Log::create(['user_id' => auth()->id(), 'action' => "Deleted book {$book->title}"]);
 
-        return to_route('books.index');
+        return redirect()->route('books.index')->with('success', 'Book deleted.');
+    }
+
+    // remove the dashes and spaces so "978-0-316" is saved as "9780316"
+    private function cleanIsbn(Request $request): void
+    {
+        $request->merge([
+            'isbn' => strtoupper(preg_replace('/[^0-9Xx]/', '', (string) $request->isbn)),
+        ]);
+    }
+
+    // friendlier error messages for the ISBN field
+    /** @return array<string, string> */
+    private function isbnMessages(): array
+    {
+        return [
+            'isbn.regex' => 'An ISBN has 10 or 13 digits. Check the number on the back cover.',
+            'isbn.unique' => 'This ISBN is already in the catalog.',
+        ];
     }
 }

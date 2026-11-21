@@ -8,11 +8,11 @@ use Inertia\Response;
 
 class HomeController extends Controller
 {
-    // The landing page: a shelf of covers for the Infinite Menu
-    public function __invoke(): Response
+    // the landing page: 30 random books with covers for the spinning shelf
+    public function index(): Response
     {
-        return Inertia::render('welcome', [
-            'books' => Book::with('category')->whereNotNull('cover_path')->inRandomOrder()->take(30)->get(),
-        ]);
+        $books = Book::with('category')->whereNotNull('cover_path')->inRandomOrder()->take(30)->get();
+
+        return Inertia::render('welcome', compact('books'));
     }
 }

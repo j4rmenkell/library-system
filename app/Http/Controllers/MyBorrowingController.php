@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Borrowing;
-use App\Services\BorrowingService;
+use App\Models\Log;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -11,25 +11,34 @@ use Inertia\Response;
 
 class MyBorrowingController extends Controller
 {
-    public function __construct(private BorrowingService $borrowings) {}
-
+    // show only the logged-in reader's own borrowings
     public function index(Request $request): Response
     {
         $member = $request->user()->member;
 
-        return Inertia::render('my-borrowings/index', [
-            'borrowings' => $member
-                ? $member->borrowings()->with('book')->latest()->get()
-                : [],
-        ]);
+        $borrowings = $member ? $member->borrowings()->with('book')->latest()->get() : [];
+
+        return Inertia::render('my-borrowings/index', compact('borrowings'));
     }
 
-    // Cancel a request that hasn't been collected yet
-    public function destroy(Request $request, Borrowing $borrowing): RedirectResponse
+    // cancel a request before collecting the book (this deletes the row)
+    public function destroy(Request $request, string $id): RedirectResponse
     {
-        // Readers may only cancel their own requests
-        abort_unless($borrowing->member_id === $request->user()->member?->id, 403);
+        $borrowing = Borrowing::with('book')->findOrFail($id);
 
-        return $this->attempt(fn () => $this->borrowings->cancel($borrowing), 'Request cancelled.');
+        // readers can only cancel their own requests
+        if ($borrowing->member_id !== $request->user()->member?->id) {
+            abort(403);
+        }
+
+        if ($borrowing->status !== 'pending') {
+            return back()->with('error', 'Only waiting requests can be cancelled.');
+        }
+
+        Log::create(['user_id' => auth()->id(), 'action' => "Cancelled request for {$borrowing->book->title} (borrowing {$borrowing->id})"]);
+
+        $borrowing->delete();
+
+        return back()->with('success', 'Request cancelled.');
     }
 }

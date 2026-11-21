@@ -12,11 +12,11 @@ use App\Http\Controllers\MyBorrowingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', HomeController::class)->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::get('dashboard', DashboardController::class)->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Librarians and admins run the library
     Route::middleware('role:admin,librarian')->group(function () {
