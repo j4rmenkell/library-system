@@ -172,10 +172,9 @@ return [
         /* @end-chisel-registration */
         Features::resetPasswords(),
         /* @chisel-email-verification */
-        // Off: the library sends no email yet, so readers could never verify.
-        // To turn it on, set up a mail service, uncomment this line, and add
-        // "implements MustVerifyEmail" back to the User model.
-        // Features::emailVerification(),
+        // New readers confirm their email before using the library. Accounts
+        // an admin creates are marked verified (UserController::store).
+        Features::emailVerification(),
         /* @end-chisel-email-verification */
         /* @chisel-2fa */
         Features::twoFactorAuthentication([
