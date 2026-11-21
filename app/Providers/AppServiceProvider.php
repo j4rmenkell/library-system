@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -24,6 +27,20 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureEmailVerification();
+    }
+
+    /**
+     * Verification emails link to our own route, which works while logged out
+     * (Fortify's needs a signed-in user, and unverified readers can't sign in).
+     */
+    protected function configureEmailVerification(): void
+    {
+        VerifyEmail::createUrlUsing(fn (User $user): string => URL::temporarySignedRoute(
+            'verification.confirm',
+            now()->addMinutes(config('auth.verification.expire', 60)),
+            ['id' => $user->getKey(), 'hash' => sha1($user->getEmailForVerification())],
+        ));
     }
 
     /**

@@ -36,8 +36,10 @@ class RegistrationTest extends TestCase
             'address' => 'Pasig City',
         ]);
 
-        $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        // Not signed in yet: they have to verify their email first
+        $this->assertGuest();
+        $response->assertRedirect(route('login', absolute: false));
+        $response->assertSessionHas('status');
         $this->assertDatabaseHas('users', [
             'username' => 'testuser',
             'role' => 'borrower',
