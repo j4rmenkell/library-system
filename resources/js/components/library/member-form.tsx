@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { index, store, update } from '@/routes/members';
 import type { Member } from '@/types';
+import { LIMITS } from '@/lib/limits';
 
 // Shared by members/create and members/edit
 export function MemberForm({ member }: { member?: Member }) {
@@ -26,6 +27,7 @@ export function MemberForm({ member }: { member?: Member }) {
                         <TextInput
                             id="name"
                             name="name"
+                            maxLength={LIMITS.name}
                             required
                             autoFocus
                             autoComplete="name"
@@ -41,6 +43,7 @@ export function MemberForm({ member }: { member?: Member }) {
                         <TextInput
                             id="contact_number"
                             name="contact_number"
+                            maxLength={LIMITS.contactNumber}
                             type="tel"
                             required
                             autoComplete="tel"
@@ -56,6 +59,7 @@ export function MemberForm({ member }: { member?: Member }) {
                         <TextArea
                             id="address"
                             name="address"
+                            maxLength={LIMITS.address}
                             rows={3}
                             required
                             autoComplete="street-address"

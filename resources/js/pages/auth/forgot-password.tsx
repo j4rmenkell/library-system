@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { login } from '@/routes';
 import { email } from '@/routes/password';
+import { LIMITS } from '@/lib/limits';
 
 export default function ForgotPassword({ status }: { status?: string }) {
     return (
@@ -30,6 +31,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                                     id="email"
                                     type="email"
                                     name="email"
+                                    maxLength={LIMITS.email}
                                     autoComplete="off"
                                     autoFocus
                                     placeholder="email@example.com"

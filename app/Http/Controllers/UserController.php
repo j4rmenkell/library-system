@@ -16,6 +16,12 @@ class UserController extends Controller
     // show all accounts, with search and a role filter
     public function index(Request $request): Response
     {
+        // the filters come from the URL, so they get checked like form input
+        $request->validate([
+            'search' => 'nullable|string|max:100',
+            'role' => 'nullable|in:admin,librarian,borrower',
+        ]);
+
         // admins first, then librarians, then readers
         $query = User::orderByRaw("case role when 'admin' then 0 when 'librarian' then 1 else 2 end")
             ->orderBy('name');
@@ -51,11 +57,11 @@ class UserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'required|string|min:3|max:30|alpha_dash|unique:users,username',
+            'name' => 'required|string|max:100|regex:/^[\pL\pM][\pL\pM\s.\'-]*$/u',
+            'username' => 'required|string|min:3|max:30|alpha_dash:ascii|unique:users,username',
             'email' => 'required|string|email|max:255|unique:users,email',
             'role' => 'required|in:admin,librarian,borrower',
-            'password' => ['required', 'string', Password::default(), 'confirmed'],
+            'password' => ['required', 'string', 'max:255', Password::default(), 'confirmed'],
         ]);
 
         // accounts the admin makes are trusted, so I mark the email as verified already
@@ -83,12 +89,12 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'required|string|min:3|max:30|alpha_dash|unique:users,username,'.$id,
+            'name' => 'required|string|max:100|regex:/^[\pL\pM][\pL\pM\s.\'-]*$/u',
+            'username' => 'required|string|min:3|max:30|alpha_dash:ascii|unique:users,username,'.$id,
             'email' => 'required|string|email|max:255|unique:users,email,'.$id,
             'role' => 'required|in:admin,librarian,borrower',
             // nullable here: leaving it empty means "keep the old password"
-            'password' => ['nullable', 'string', Password::default(), 'confirmed'],
+            'password' => ['nullable', 'string', 'max:255', Password::default(), 'confirmed'],
         ]);
 
         // I can't change my own role, so there's always an admin left to manage accounts

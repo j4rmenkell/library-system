@@ -14,6 +14,11 @@ class MemberController extends Controller
     // show all readers, with a search
     public function index(Request $request): Response
     {
+        // the filters come from the URL, so they get checked like form input
+        $request->validate([
+            'search' => 'nullable|string|max:100',
+        ]);
+
         // count only the books they asked for or still have (pending + borrowed)
         $query = Member::withCount([
             'borrowings as active_borrowings_count' => function ($q) {
@@ -91,10 +96,11 @@ class MemberController extends Controller
     private function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
+            // letters (ñ too), spaces, periods, apostrophes and hyphens
+            'name' => 'required|string|max:100|regex:/^[\pL\pM][\pL\pM\s.\'-]*$/u',
             // digits, spaces, +, - and brackets: "0917 555 0123" or "+63 917 555 0123"
             'contact_number' => ['required', 'string', 'max:20', 'regex:/^[0-9+\-\s()]{7,20}$/'],
-            'address' => 'required|string|max:500',
+            'address' => 'required|string|max:255',
         ];
     }
 

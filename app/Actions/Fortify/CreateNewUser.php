@@ -25,7 +25,7 @@ class CreateNewUser implements CreatesNewUsers
             ...$this->profileRules(),
             'username' => $this->usernameRules(),
             'contact_number' => ['required', 'string', 'max:20', 'regex:/^[0-9+\-\s()]{7,20}$/'],
-            'address' => ['required', 'string', 'max:500'],
+            'address' => ['required', 'string', 'max:255'],
             'password' => $this->passwordRules(),
         ])->validate();
 

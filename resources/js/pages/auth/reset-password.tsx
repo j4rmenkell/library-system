@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { update } from '@/routes/password';
+import { LIMITS } from '@/lib/limits';
 
 type Props = {
     token: string;
@@ -31,6 +32,7 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
                                 id="email"
                                 type="email"
                                 name="email"
+                                maxLength={LIMITS.email}
                                 autoComplete="email"
                                 value={email}
                                 className="mt-1 block w-full"
@@ -47,6 +49,7 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
                             <PasswordInput
                                 id="password"
                                 name="password"
+                                maxLength={LIMITS.password}
                                 autoComplete="new-password"
                                 className="mt-1 block w-full"
                                 autoFocus
@@ -63,6 +66,7 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
                             <PasswordInput
                                 id="password_confirmation"
                                 name="password_confirmation"
+                                maxLength={LIMITS.password}
                                 autoComplete="new-password"
                                 className="mt-1 block w-full"
                                 placeholder="Confirm password"

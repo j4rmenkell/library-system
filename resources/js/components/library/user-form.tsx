@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { index, store, update } from '@/routes/users';
 import type { Role, User } from '@/types';
+import { LIMITS } from '@/lib/limits';
 
 const ROLES: { value: Role; label: string; description: string }[] = [
     {
@@ -48,6 +49,7 @@ export function UserForm({ user }: { user?: User }) {
                         <TextInput
                             id="name"
                             name="name"
+                            maxLength={LIMITS.name}
                             required
                             autoFocus
                             defaultValue={user?.name}
@@ -63,6 +65,7 @@ export function UserForm({ user }: { user?: User }) {
                             <TextInput
                                 id="username"
                                 name="username"
+                                maxLength={LIMITS.username}
                                 required
                                 autoComplete="off"
                                 defaultValue={user?.username}
@@ -77,6 +80,7 @@ export function UserForm({ user }: { user?: User }) {
                             <TextInput
                                 id="email"
                                 name="email"
+                                maxLength={LIMITS.email}
                                 type="email"
                                 required
                                 autoComplete="off"
@@ -135,6 +139,7 @@ export function UserForm({ user }: { user?: User }) {
                             <TextInput
                                 id="password"
                                 name="password"
+                                maxLength={LIMITS.password}
                                 type="password"
                                 required={!user}
                                 autoComplete="new-password"
@@ -148,6 +153,7 @@ export function UserForm({ user }: { user?: User }) {
                             <TextInput
                                 id="password_confirmation"
                                 name="password_confirmation"
+                                maxLength={LIMITS.password}
                                 type="password"
                                 required={!user}
                                 autoComplete="new-password"

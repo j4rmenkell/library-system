@@ -11,6 +11,7 @@ import {
     store as confirmStore,
 } from '@/actions/Laravel/Passkeys/Http/Controllers/PasskeyConfirmationController';
 import PasskeyVerify from '@/components/passkey-verify';
+import { LIMITS } from '@/lib/limits';
 /* @end-chisel-passkeys */
 
 export default function ConfirmPassword() {
@@ -38,6 +39,7 @@ export default function ConfirmPassword() {
                             <PasswordInput
                                 id="password"
                                 name="password"
+                                maxLength={LIMITS.password}
                                 placeholder="Password"
                                 autoComplete="current-password"
                                 autoFocus

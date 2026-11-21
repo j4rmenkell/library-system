@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { index, store, update } from '@/routes/books';
 import { index as categoriesIndex } from '@/routes/categories';
 import type { Book, Category } from '@/types';
+import { LIMITS } from '@/lib/limits';
 
 // Shared by books/create and books/edit
 export function BookForm({
@@ -33,6 +34,7 @@ export function BookForm({
                         <TextInput
                             id="title"
                             name="title"
+                            maxLength={LIMITS.title}
                             required
                             autoFocus
                             defaultValue={book?.title}
@@ -46,6 +48,7 @@ export function BookForm({
                         <TextInput
                             id="author"
                             name="author"
+                            maxLength={LIMITS.author}
                             required
                             defaultValue={book?.author}
                         />
@@ -61,6 +64,7 @@ export function BookForm({
                             <TextInput
                                 id="isbn"
                                 name="isbn"
+                                maxLength={LIMITS.isbn}
                                 required
                                 inputMode="numeric"
                                 defaultValue={book?.isbn}
@@ -78,6 +82,7 @@ export function BookForm({
                                 id="publication_year"
                                 name="publication_year"
                                 type="number"
+                                min={-3000}
                                 max={new Date().getFullYear()}
                                 defaultValue={book?.publication_year ?? ''}
                             />

@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { destroy, index, store, update } from '@/routes/categories';
 import type { Category } from '@/types';
+import { LIMITS } from '@/lib/limits';
 
 type Editing = Category | 'new' | null;
 
@@ -60,6 +61,7 @@ function CategoryDialog({
                                 <TextInput
                                     id="name"
                                     name="name"
+                                    maxLength={LIMITS.name}
                                     required
                                     autoFocus
                                     defaultValue={category?.name}
@@ -74,6 +76,7 @@ function CategoryDialog({
                                 <TextArea
                                     id="description"
                                     name="description"
+                                    maxLength={LIMITS.description}
                                     rows={3}
                                     defaultValue={category?.description ?? ''}
                                 />

@@ -7,6 +7,7 @@ import { Pagination } from '@/components/library/pagination';
 import { Button } from '@/components/ui/button';
 import { create, edit, index, show } from '@/routes/members';
 import type { Member, Paginated } from '@/types';
+import { LIMITS } from '@/lib/limits';
 
 export default function MembersIndex({
     members,
@@ -40,6 +41,7 @@ export default function MembersIndex({
                     <TextInput
                         id="search"
                         name="search"
+                        maxLength={LIMITS.search}
                         type="search"
                         placeholder="Name or contact number"
                         defaultValue={filters.search}

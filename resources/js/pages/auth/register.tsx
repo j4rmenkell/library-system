@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
+import { LIMITS } from '@/lib/limits';
 
 type Props = {
     passwordRules: string;
@@ -36,6 +37,7 @@ export default function Register({ passwordRules }: Props) {
                                     tabIndex={1}
                                     autoComplete="name"
                                     name="name"
+                                    maxLength={LIMITS.name}
                                     placeholder="Full name"
                                 />
                                 <InputError
@@ -53,6 +55,7 @@ export default function Register({ passwordRules }: Props) {
                                     tabIndex={2}
                                     autoComplete="username"
                                     name="username"
+                                    maxLength={LIMITS.username}
                                     placeholder="juandc"
                                 />
                                 <InputError message={errors.username} />
@@ -67,6 +70,7 @@ export default function Register({ passwordRules }: Props) {
                                     tabIndex={3}
                                     autoComplete="email"
                                     name="email"
+                                    maxLength={LIMITS.email}
                                     placeholder="email@example.com"
                                 />
                                 <InputError message={errors.email} />
@@ -83,6 +87,7 @@ export default function Register({ passwordRules }: Props) {
                                     tabIndex={4}
                                     autoComplete="tel"
                                     name="contact_number"
+                                    maxLength={LIMITS.contactNumber}
                                     placeholder="0917 555 0123"
                                 />
                                 <InputError message={errors.contact_number} />
@@ -97,6 +102,7 @@ export default function Register({ passwordRules }: Props) {
                                     tabIndex={5}
                                     autoComplete="street-address"
                                     name="address"
+                                    maxLength={LIMITS.address}
                                     placeholder="Barangay, city"
                                 />
                                 <InputError message={errors.address} />
@@ -110,6 +116,7 @@ export default function Register({ passwordRules }: Props) {
                                     tabIndex={6}
                                     autoComplete="new-password"
                                     name="password"
+                                    maxLength={LIMITS.password}
                                     placeholder="Password"
                                     passwordrules={passwordRules}
                                 />
@@ -126,6 +133,7 @@ export default function Register({ passwordRules }: Props) {
                                     tabIndex={7}
                                     autoComplete="new-password"
                                     name="password_confirmation"
+                                    maxLength={LIMITS.password}
                                     placeholder="Confirm password"
                                     passwordrules={passwordRules}
                                 />

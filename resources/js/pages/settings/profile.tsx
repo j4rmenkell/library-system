@@ -13,6 +13,7 @@ import { edit } from '@/routes/profile';
 import type { Auth } from '@/types';
 /* @chisel-email-verification */
 import { send } from '@/routes/verification';
+import { LIMITS } from '@/lib/limits';
 /* @end-chisel-email-verification */
 
 type PageProps = {
@@ -62,6 +63,7 @@ export default function Profile(
                                     className="mt-1 block w-full"
                                     defaultValue={auth.user.name}
                                     name="name"
+                                    maxLength={LIMITS.name}
                                     required
                                     autoComplete="name"
                                     placeholder="Full name"
@@ -82,6 +84,7 @@ export default function Profile(
                                     className="mt-1 block w-full"
                                     defaultValue={auth.user.email}
                                     name="email"
+                                    maxLength={LIMITS.email}
                                     required
                                     autoComplete="username"
                                     placeholder="Email address"

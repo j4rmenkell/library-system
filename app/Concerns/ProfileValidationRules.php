@@ -28,7 +28,8 @@ trait ProfileValidationRules
      */
     protected function nameRules(): array
     {
-        return ['required', 'string', 'max:255'];
+        // letters (ñ too), spaces, periods, apostrophes and hyphens
+        return ['required', 'string', 'max:100', 'regex:/^[\pL\pM][\pL\pM\s.\'-]*$/u'];
     }
 
     /**
@@ -61,7 +62,7 @@ trait ProfileValidationRules
             'string',
             'min:3',
             'max:30',
-            'alpha_dash',
+            'alpha_dash:ascii',
             $userId === null
                 ? Rule::unique(User::class)
                 : Rule::unique(User::class)->ignore($userId),

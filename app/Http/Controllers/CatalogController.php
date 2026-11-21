@@ -16,6 +16,12 @@ class CatalogController extends Controller
     // the reader's view of the books, with search and a category filter
     public function index(Request $request): Response
     {
+        // the filters come from the URL, so they get checked like form input
+        $request->validate([
+            'search' => 'nullable|string|max:100',
+            'category' => 'nullable|integer|exists:categories,id',
+        ]);
+
         // every reader gets a member profile when they sign up, so this shouldn't happen
         $member = $request->user()->member;
 

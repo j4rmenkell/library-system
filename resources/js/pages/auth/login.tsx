@@ -14,6 +14,7 @@ import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 /* @chisel-passkeys */
 import PasskeyVerify from '@/components/passkey-verify';
+import { LIMITS } from '@/lib/limits';
 /* @end-chisel-passkeys */
 
 type Props = {
@@ -44,6 +45,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                     id="email"
                                     type="email"
                                     name="email"
+                                    maxLength={LIMITS.email}
                                     required
                                     autoFocus
                                     tabIndex={1}
@@ -69,6 +71,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                 <PasswordInput
                                     id="password"
                                     name="password"
+                                    maxLength={LIMITS.password}
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"

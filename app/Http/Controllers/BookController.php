@@ -15,6 +15,13 @@ class BookController extends Controller
     // show all books, with search and filters
     public function index(Request $request): Response
     {
+        // the filters come from the URL, so they get checked like form input
+        $request->validate([
+            'search' => 'nullable|string|max:100',
+            'category' => 'nullable|integer|exists:categories,id',
+            'status' => 'nullable|in:available,borrowed',
+        ]);
+
         $query = Book::with('category')->orderBy('title');
 
         // search by title, author or ISBN

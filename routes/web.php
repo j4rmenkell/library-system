@@ -13,6 +13,16 @@ use App\Http\Controllers\MyBorrowingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
+// IDs in URLs are numbers; anything else is a 404 instead of a database error
+Route::patterns([
+    'id' => '[0-9]+',
+    'book' => '[0-9]+',
+    'borrowing' => '[0-9]+',
+    'category' => '[0-9]+',
+    'member' => '[0-9]+',
+    'user' => '[0-9]+',
+]);
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // The link in the verification email: signed, so it can't be guessed or edited

@@ -14,6 +14,7 @@ import { StatusMarker } from '@/components/library/status-marker';
 import { Button } from '@/components/ui/button';
 import { create, destroy, edit, index } from '@/routes/books';
 import type { Book, Category, Paginated } from '@/types';
+import { LIMITS } from '@/lib/limits';
 
 type Filters = { search?: string; category?: string; status?: string };
 
@@ -54,6 +55,7 @@ export default function BooksIndex({
                     <TextInput
                         id="search"
                         name="search"
+                        maxLength={LIMITS.search}
                         type="search"
                         placeholder="Title, author or ISBN"
                         defaultValue={filters.search}

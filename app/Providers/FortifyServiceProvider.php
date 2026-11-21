@@ -54,10 +54,18 @@ class FortifyServiceProvider extends ServiceProvider
         /* @end-chisel-registration */
 
         Fortify::authenticateUsing(function (Request $request): ?User {
-            $user = User::where('email', $request->input(Fortify::username()))->first();
+            $email = (string) $request->input(Fortify::username());
+            $password = (string) $request->input('password');
+
+            // Nothing longer than the sign-up form accepts can be a real login
+            if (strlen($email) > 255 || strlen($password) > 255) {
+                return null;
+            }
+
+            $user = User::where('email', $email)->first();
 
             // Wrong email or password: Fortify shows "These credentials do not match"
-            if (! $user || ! Hash::check((string) $request->input('password'), $user->password)) {
+            if (! $user || ! Hash::check($password, $user->password)) {
                 return null;
             }
 

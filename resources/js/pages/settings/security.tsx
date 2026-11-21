@@ -14,6 +14,7 @@ import ManagePasskeys from '@/components/manage-passkeys';
 /* @chisel-2fa */
 import type { Props as ManageTwoFactorProps } from '@/components/manage-two-factor';
 import ManageTwoFactor from '@/components/manage-two-factor';
+import { LIMITS } from '@/lib/limits';
 /* @end-chisel-2fa */
 
 // oxfmt-ignore
@@ -72,6 +73,7 @@ export default function Security(props: Props) {
                                     id="current_password"
                                     ref={currentPasswordInput}
                                     name="current_password"
+                                    maxLength={LIMITS.password}
                                     className="mt-1 block w-full"
                                     autoComplete="current-password"
                                     placeholder="Current password"
@@ -87,6 +89,7 @@ export default function Security(props: Props) {
                                     id="password"
                                     ref={passwordInput}
                                     name="password"
+                                    maxLength={LIMITS.password}
                                     className="mt-1 block w-full"
                                     autoComplete="new-password"
                                     placeholder="New password"
@@ -104,6 +107,7 @@ export default function Security(props: Props) {
                                 <PasswordInput
                                     id="password_confirmation"
                                     name="password_confirmation"
+                                    maxLength={LIMITS.password}
                                     className="mt-1 block w-full"
                                     autoComplete="new-password"
                                     placeholder="Confirm password"

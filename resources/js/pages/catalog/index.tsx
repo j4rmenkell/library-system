@@ -9,6 +9,7 @@ import { MAX_ACTIVE_LOANS } from '@/lib/library';
 import { cn } from '@/lib/utils';
 import { borrow, index } from '@/routes/catalog';
 import type { Book, Category, Paginated } from '@/types';
+import { LIMITS } from '@/lib/limits';
 
 export default function CatalogIndex({
     books,
@@ -58,6 +59,7 @@ export default function CatalogIndex({
                         <TextInput
                             id="search"
                             name="search"
+                            maxLength={LIMITS.search}
                             type="search"
                             placeholder="Title, author or ISBN"
                             defaultValue={filters.search}

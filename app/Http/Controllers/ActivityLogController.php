@@ -13,6 +13,13 @@ class ActivityLogController extends Controller
     // show who did what, newest first, with filters for person and dates
     public function index(Request $request): Response
     {
+        // the filters come from the URL, so they get checked like form input
+        $request->validate([
+            'user' => 'nullable|integer',
+            'from' => 'nullable|date_format:Y-m-d',
+            'to' => 'nullable|date_format:Y-m-d|after_or_equal:from',
+        ]);
+
         $query = Log::with('user')->latest('id');
 
         if ($request->input('user')) {

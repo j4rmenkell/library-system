@@ -12,6 +12,7 @@ import { formatDate } from '@/lib/library';
 import { cn } from '@/lib/utils';
 import { create, edit, index } from '@/routes/users';
 import type { Paginated, Role, User } from '@/types';
+import { LIMITS } from '@/lib/limits';
 
 const roleLabels: Record<Role, string> = {
     admin: 'Admin',
@@ -53,6 +54,7 @@ export default function UsersIndex({
                     <TextInput
                         id="search"
                         name="search"
+                        maxLength={LIMITS.search}
                         type="search"
                         placeholder="Name, username or email"
                         defaultValue={filters.search}
