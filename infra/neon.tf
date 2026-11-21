@@ -9,7 +9,7 @@ resource "neon_project" "athenaeum" {
   pg_version                = 17
   history_retention_seconds = 21600
 
-lifecycle {
+  lifecycle {
     prevent_destroy = true
   }
 }

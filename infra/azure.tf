@@ -24,7 +24,7 @@ resource "azurerm_container_app_environment" "main" {
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   tags                = local.tags
-  
+
   workload_profile {
     name                  = "Consumption"
     workload_profile_type = "Consumption"
@@ -53,6 +53,11 @@ resource "azurerm_container_app" "app" {
   secret {
     name  = "admin-password"
     value = random_password.admin.result
+  }
+
+  secret {
+    name  = "mail-password"
+    value = var.mail_password
   }
 
   ingress {
@@ -146,9 +151,34 @@ resource "azurerm_container_app" "app" {
         name  = "QUEUE_CONNECTION"
         value = "sync"
       }
+      # Password reset emails go out through Gmail SMTP
       env {
         name  = "MAIL_MAILER"
-        value = "log"
+        value = "smtp"
+      }
+      env {
+        name  = "MAIL_SCHEME"
+        value = "smtps"
+      }
+      env {
+        name  = "MAIL_HOST"
+        value = "smtp.gmail.com"
+      }
+      env {
+        name  = "MAIL_PORT"
+        value = "465"
+      }
+      env {
+        name  = "MAIL_USERNAME"
+        value = var.mail_username
+      }
+      env {
+        name        = "MAIL_PASSWORD"
+        secret_name = "mail-password"
+      }
+      env {
+        name  = "MAIL_FROM_ADDRESS"
+        value = var.mail_username
       }
 
       env {
